@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        function newExit() {
+            alert("newnewnewnewnew");
+            if (getBrowserType().isAndroid) {
+                KDS_Native.onExit("suc");
+            } else {
+                loadURL("KDS_Native://closeCurrentView");
+            }
+        }
+        function oldExit() {
+            alert("oldoldoldoldold");
+            if (getBrowserType().isAndroid) {
+                imJsObj.onExit("suc");
+            } else {
+                loadURL("imJsObj://closeCurrentView");
+            }
+        }
+        function loadURL(url) {
+            var iFrame;
+            iFrame = document.createElement("iframe");
+            iFrame.setAttribute("src", url);
+            iFrame.setAttribute("style", "display:none;");
+            iFrame.setAttribute("height", "0px");
+            iFrame.setAttribute("width", "0px");
+            iFrame.setAttribute("frameborder", "0");
+            document.body.appendChild(iFrame);
+            // 发起请求后这个 iFrame 就没用了，所以把它从 dom 上移除掉
+            iFrame.parentNode.removeChild(iFrame);
+            iFrame = null;
+        }
+        function getBrowserType() {
+            var platform = {};
+            var ua = navigator.userAgent.toLowerCase();
+            console.log("ua:" + ua);
+            if (ua.indexOf('android') > -1) {
+                platform['type'] = "Android";
+                platform['isAndroid'] = true;
+                platform['isIPhone'] = false;
+                platform['isBrower'] = false;
+            } else if (ua.indexOf('iphone') > -1 || ua.indexOf('ipad') > -1) {
+                platform['type'] = "IOS";
+                platform['isAndroid'] = false;
+                platform['isIPhone'] = true;
+                platform['isBrower'] = false;
+            } else {
+                platform['type'] = "PC";
+                platform['isAndroid'] = false;
+                platform['isIPhone'] = false;
+                platform['isBrower'] = true;
+            }
+            return platform;
+        }
+        function realexit() {
+            alert("uuuuuuuuuuuuuuu");
+            if (getBrowserType().isAndroid) {
+                try {
+                    imJsObj.onExit("suc");
+                } catch (e) {
+                    console.log("method execute error imJsObj");
+                }
+                KDS_Native.onExit("suc");
+            } else {
+                loadURL("KDS_Native://closeCurrentView");
+            }
+        }
+
+        /*跳转至电子回访webview js方法 */
+        function switchToGycfs() {
+            //跳转电子回访页面url
+            var gycfsUrl = "http://60.173.222.38:38098/gycfs-api/dianjinadv/index.html?channelType=1&showNav=1";
+            //跳转webview标题
+            var webViewTitle = "电子回访";
+            //判断当前版本是否支持该功能
+            if (navigator.userAgent.indexOf("GYDJ") != -1) {
+                //判断当前设备是否为安卓
+                if (getBrowserType().isAndroid) {
+                    try {
+                        KDS_Native.switchWebView(webViewTitle, gycfsUrl);
+                    } catch (e) {
+                        console.log("error occurs executing switchWebView by android");
+                    }
+                    //IOS设备逻辑
+                } else {
+                    try {
+                        loadURL("KDS_Native://switchWebView:" + webViewTitle + ":" + gycfsUrl);
+                    } catch (e) {
+                        console.log("error occurs executing switchWebView by ios");
+                    }
+                }
+            } else {
+                window.location.href = "http://60.173.222.38:38098/gycfs-api/dianjinadv/index.html?channelType=1&showNav=1";
+            }
+        }
+    </script>
+</head>
+<body>
+    <button onclick="newExit()">点我测试新版本退出</button>
+    <button onclick="oldExit()">点我测试老版本退出</button>
+    <button onclick="realexit()">点我测试统一退出</button>
+    <button onclick="switchToGycfs()">点我测试跳转至电子回访webview</button>
+    <script src="http://cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script>
+    <script>eruda.init();</script>
+</body>
+</html>
